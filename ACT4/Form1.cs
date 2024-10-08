@@ -13,19 +13,15 @@ namespace ACT4
 {
     public partial class Form1 : Form
     {
+        SixState startState;
+        SixState[] population_states; 
+        int moveCounter;
         int side;
         int n = 6;
-        SixState startState;
-        SixState[] pStates; 
-
-        int moveCounter;
-
         int population; 
         int crossingPoint;
         int pExponent;
-
         double mRate;
-
         int[] hTable;
         ArrayList bMoves;
         object chosenMove;
@@ -41,10 +37,10 @@ namespace ACT4
 
             side = pictureBox1.Width / n;
 
-            pStates = new SixState[population];
-            pStates[0] = startState = randomSixState();
+            population_states = new SixState[population];
+            population_states[0] = startState = randomSixState();
             for (int i = 1; i < population; i++)
-                pStates[i] = randomSixState();
+                population_states[i] = randomSixState();
 
             label3.Text = "Attacking pairs: " + getAttackingPairs(startState);
             label4.Text = "Generations: " + moveCounter;
@@ -57,18 +53,18 @@ namespace ACT4
             (SixState, int)[] stateWithHValue = new (SixState, int)[population];
 
             for (int i = 0; i < population; i++)
-                stateWithHValue[i] = (pStates[i], hTable[i]);
+                stateWithHValue[i] = (population_states[i], hTable[i]);
 
             Array.Sort(stateWithHValue, (x, y) => x.Item2.CompareTo(y.Item2));
 
             for (int i = 0; i < population; i++)
             {
-                pStates[i] = stateWithHValue[i].Item1;
+                population_states[i] = stateWithHValue[i].Item1;
                 hTable[i] = stateWithHValue[i].Item2;
             }
         }
 
-        private SixState[] generateChildren(SixState parent1, SixState parent2)
+        private SixState[] makeChildren(SixState parent1, SixState parent2)
         {
             SixState[] child = new SixState[2];
             
@@ -104,19 +100,19 @@ namespace ACT4
 
             
             int[] parentIndices = getParentsIndex();
-            SixState[] children = generateChildren(pStates[0], pStates[1]);
+            SixState[] children = makeChildren(population_states[0], population_states[1]);
             newPopulation[0] = new SixState(children[0]);
             newPopulation[1] = new SixState(children[1]);
 
             for (int i = 3; i < population; i += 2)
             {
                 parentIndices = getParentsIndex();
-                children = generateChildren(pStates[parentIndices[0]], pStates[parentIndices[1]]);
+                children = makeChildren(population_states[parentIndices[0]], population_states[parentIndices[1]]);
                 newPopulation[i] = new SixState(children[0]);
                 newPopulation[i - 1] = new SixState(children[1]);
             }
 
-            pStates = newPopulation;
+            population_states = newPopulation;
         }
 
         private int[] getParentsIndex()
@@ -138,7 +134,7 @@ namespace ACT4
         private void updateUI()
         {
 
-            hTable = getHeuristicTableForPossibleMoves(pStates);
+            hTable = getHeuristicTableForPossibleMoves(population_states);
             bMoves = getBestMoves(hTable);
 
             listBox1.Items.Clear();
@@ -236,7 +232,7 @@ namespace ACT4
             int[] hStates = new int[population];
 
             for (int i = 0; i < population; i++) // go through the indices
-                hStates[i] = getAttackingPairs(pStates[i]);
+                hStates[i] = getAttackingPairs(population_states[i]);
 
             return hStates;
         }
@@ -272,7 +268,7 @@ namespace ACT4
 
             for (int i = 0; i < n; i++)
             {
-                startState.Y[i] = pStates[0].Y[i];
+                startState.Y[i] = population_states[0].Y[i];
             }
 
             pictureBox2.Refresh();
@@ -298,9 +294,9 @@ namespace ACT4
         private void button3_Click(object sender, EventArgs e)
         {
             startState = randomSixState();
-            pStates[0] = new SixState(startState);
+            population_states[0] = new SixState(startState);
             for (int i = 1; i < population; i++)
-                pStates[i] = new SixState(startState);
+                population_states[i] = new SixState(startState);
 
             moveCounter = 0;
 
